@@ -1,0 +1,9 @@
+{
+  "id": "botlink",
+  "channels": ["botlink"],
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "@botlink/openclaw-botlink-channel",
+  "version": "0.1.0",
+  "description": "OpenClaw Botlink channel plugin (Telegram-compatible HTTP API via long polling)",
+  "type": "module",
+  "files": [
+    "index.ts",
+    "openclaw.plugin.json",
+    "src",
+    "README.md"
+  ],
+  "dependencies": {
+    "zod": "^4.3.6"
+  },
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ],
+    "channel": {
+      "id": "botlink",
+      "label": "Botlink",
+      "selectionLabel": "Botlink (Telegram-compatible)",
+      "docsPath": "/channels/botlink",
+      "docsLabel": "botlink",
+      "blurb": "Botlink gateway via Telegram-compatible HTTP API (long polling).",
+      "aliases": [
+        "botlink-http"
+      ],
+      "order": 86
+    },
+    "install": {
+      "npmSpec": "@botlink/openclaw-botlink-channel",
+      "localPath": "packages/openclaw-botlink-channel",
+      "defaultChoice": "npm"
+    }
+  }
+}
