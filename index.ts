@@ -4,7 +4,7 @@ import { botlinkPlugin } from "./src/channel.js";
 import { setBotlinkRuntime } from "./src/runtime.js";
 
 const plugin = {
-  id: "botlink",
+  id: "openclaw-botlink-channel",
   name: "Botlink",
   description: "Botlink channel plugin (Telegram-compatible HTTP long polling)",
   configSchema: emptyPluginConfigSchema(),

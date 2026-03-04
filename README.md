@@ -3,6 +3,11 @@
 OpenClaw 的 Botlink 渠道插件。  
 传输方式：Botlink Telegram 兼容 HTTP API（`/bot{token}/{method}`），入站模式使用长轮询（Long Polling）。
 
+## 环境要求
+
+- Node.js 20+
+- OpenClaw CLI（建议 `2026.3.x` 或更新版本）
+
 ## 功能（v0.1）
 
 - 文本消息收发
@@ -31,33 +36,63 @@ OpenClaw 的 Botlink 渠道插件。
 }
 ```
 
-## 用户安装 / 启用 / 配置
+## 从 Git 拉取后本地可直接使用（推荐）
 
-如果已发布到 npm：
+1. 克隆仓库并进入目录：
+
+```bash
+git clone <your-repo-url>
+cd openclaw-botlink-channel
+```
+
+2. 安装并启用插件（`openclaw-botlink-channel` 是插件 ID，`botlink` 是渠道 ID）：
+
+```bash
+openclaw plugins install .
+openclaw plugins enable openclaw-botlink-channel
+```
+
+3. 添加 Botlink 渠道账号并检查状态：
+
+```bash
+openclaw channels add --channel botlink --token <botToken> --http-url <apiBaseUrl>
+openclaw channels status
+```
+
+4. 可选：探测远端连通性（需要网关运行且凭据有效）：
+
+```bash
+openclaw channels status --probe --timeout 10000
+```
+
+## 本地开发（可选）
+
+如果你在调试插件代码并希望直接引用工作区源码（不复制到 OpenClaw 扩展目录）：
+
+```bash
+npm install
+openclaw plugins install . --link
+openclaw plugins enable openclaw-botlink-channel
+```
+
+## 通过 npm 安装 / 启用 / 配置
+
+如果包已发布：
 
 ```bash
 openclaw plugins install @<scope>/openclaw-botlink-channel
-openclaw plugins enable botlink
+openclaw plugins enable openclaw-botlink-channel
 openclaw channels add --channel botlink --token <botToken> --http-url <apiBaseUrl>
-openclaw channels status --probe
+openclaw channels status --probe --timeout 10000
 ```
 
-本包的具体示例：
+本包示例：
 
 ```bash
 openclaw plugins install @botlink/openclaw-botlink-channel
-openclaw plugins enable botlink
+openclaw plugins enable openclaw-botlink-channel
 openclaw channels add --channel botlink --token <botToken> --http-url <apiBaseUrl>
-openclaw channels status --probe
-```
-
-## 本地开发安装
-
-在 OpenClaw 仓库根目录执行：
-
-```bash
-openclaw plugins install ../packages/openclaw-botlink-channel
-openclaw plugins enable botlink
+openclaw channels status --probe --timeout 10000
 ```
 
 ## 发布（npm）

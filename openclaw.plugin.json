@@ -1,5 +1,5 @@
 {
-  "id": "botlink",
+  "id": "openclaw-botlink-channel",
   "channels": ["botlink"],
   "configSchema": {
     "type": "object",
