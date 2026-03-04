@@ -30,7 +30,7 @@ OpenClaw 的 Botlink 渠道插件。
     "botlink": {
       "enabled": true,
       "botToken": "<botToken>",
-      "apiBaseUrl": "https://botlink-gateway.example.com"
+      "apiBaseUrl": "https://test.51yzt.cn"
     }
   }
 }
@@ -41,7 +41,7 @@ OpenClaw 的 Botlink 渠道插件。
 1. 克隆仓库并进入目录：
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/kinghy949/openclaw-botlink-channel.git
 cd openclaw-botlink-channel
 ```
 
@@ -55,7 +55,7 @@ openclaw plugins enable openclaw-botlink-channel
 3. 添加 Botlink 渠道账号并检查状态：
 
 ```bash
-openclaw channels add --channel botlink --token <botToken> --http-url <apiBaseUrl>
+openclaw channels add --channel botlink --token <botToken> --http-url https://test.51yzt.cn
 openclaw channels status
 ```
 
