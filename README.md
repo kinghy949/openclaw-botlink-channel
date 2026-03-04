@@ -54,13 +54,20 @@ OpenClaw 的 Botlink 渠道插件。
 
 ```bash
 git clone https://github.com/kinghy949/openclaw-botlink-channel.git
+```
+
+```bash
 cd openclaw-botlink-channel
 ```
 
 2. 安装并启用插件（`openclaw-botlink-channel` 是插件 ID，`botlink` 是渠道 ID）：
 
 ```bash
+## 注意末尾的"."不能省略
 openclaw plugins install .
+```
+
+```bash
 openclaw plugins enable openclaw-botlink-channel
 ```
 
@@ -68,6 +75,8 @@ openclaw plugins enable openclaw-botlink-channel
 
 ```bash
 openclaw channels add --channel botlink --token <botToken> --http-url https://test.51yzt.cn
+```
+```bash
 openclaw channels status
 ```
 
