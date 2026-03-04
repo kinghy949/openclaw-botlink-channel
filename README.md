@@ -36,6 +36,18 @@ OpenClaw 的 Botlink 渠道插件。
 }
 ```
 
+## 如何获取 botToken
+
+1. 登录 `https://test.51yzt.cn`，进入“机器人”页面。
+2. 在“我的机器人”中点击“创建新机器人”。
+3. 填写机器人名称、描述和访问模式后，点击“创建”。
+4. 在创建成功弹窗中复制 `Bot Token`（该 Token 通常仅在创建时展示一次）。
+5. 将复制的 Token 用于 OpenClaw 配置中的 `--token` 参数。
+
+示意图（创建机器人并复制 Bot Token）：
+
+![创建机器人并复制 Bot Token 示例](./docs/images/PNG001.png)
+
 ## 从 Git 拉取后本地可直接使用（推荐）
 
 1. 克隆仓库并进入目录：
