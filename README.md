@@ -8,12 +8,65 @@ OpenClaw 的 Botlink 渠道插件。
 - Node.js 20+
 - OpenClaw CLI（建议 `2026.3.x` 或更新版本）
 
-## 功能（v0.1）
+## 功能（v1.0.2）
 
 - 文本消息收发
 - 媒体消息收发
 - 消息编辑/删除动作
 - 消息反应动作
+- 新增多agent支持
+
+## 如何获取 botToken
+
+1. 登录 `https://test.51yzt.cn`，进入“机器人”页面。
+2. 在“我的机器人”中点击“创建新机器人”。
+3. 填写机器人名称、描述和访问模式后，点击“创建”。
+4. 在创建成功弹窗中复制 `Bot Token`（该 Token 通常仅在创建时展示一次）。
+5. 将复制的 Token 用于 OpenClaw 配置中的 `--token` 参数。
+
+示意图（创建机器人并复制 Bot Token）：
+
+![创建机器人并复制 Bot Token 示例](./docs/images/PNG001.png)
+
+## 新用户首次接入（必须先做）
+
+首次使用本插件时，请先完成本节；多 AGENT 属于后续扩展，见下文“多账号（多 Agent）扩展（可选）”。
+
+1. 克隆仓库并进入目录：
+
+```bash
+git clone https://github.com/kinghy949/openclaw-botlink-channel.git
+```
+
+```bash
+cd openclaw-botlink-channel
+```
+
+2. 安装并启用插件（`openclaw-botlink-channel` 是插件 ID，`botlink` 是渠道 ID）：
+
+```bash
+# 注意末尾的 "." 不能省略
+openclaw plugins install .
+```
+
+```bash
+openclaw plugins enable openclaw-botlink-channel
+```
+
+3. 添加 Botlink 渠道账号并检查状态：
+
+```bash
+openclaw channels add --channel botlink --token <botToken> --http-url https://test.51yzt.cn
+```
+```bash
+openclaw channels status
+```
+
+4. 可选：探测远端连通性（需要网关运行且凭据有效）：
+
+```bash
+openclaw channels status --probe --timeout 10000
+```
 
 ## 必需的 OpenClaw 渠道配置
 
@@ -36,9 +89,9 @@ OpenClaw 的 Botlink 渠道插件。
 }
 ```
 
-## 多账号（多 Agent）配置
+## 多 Agent扩展（可选）
 
-如果你要在 Botlink 中使用多个机器人账号（每个账号一个 `botToken`），请使用 `channels.botlink.accounts`，并在 `bindings[].match.accountId` 里把不同账号路由到不同 agent。
+如果你要在 Botlink 中使用多个Agent（每个Agent一个 `botToken`），请使用 `channels.botlink.accounts`，并在 `bindings[].match.accountId` 里把不同账号路由到不同 agent。
 
 > `peer.id` 不能替代 `botToken`。  
 > `peer.id` 是路由匹配维度（谁在说话/哪个群），`botToken` 是连接哪个机器人账号的鉴权凭据。
@@ -106,56 +159,6 @@ openclaw agents bind --agent <agentName> --bind botlink:<agentName>
 openclaw agents add kinghy
 openclaw channels add --channel botlink --account kinghy --token bot_4RZ*******FiwwTfMyvfc --http-url https://test.51yzt.cn
 openclaw agents bind --agent kinghy --bind botlink:kinghy
-```
-
-## 如何获取 botToken
-
-1. 登录 `https://test.51yzt.cn`，进入“机器人”页面。
-2. 在“我的机器人”中点击“创建新机器人”。
-3. 填写机器人名称、描述和访问模式后，点击“创建”。
-4. 在创建成功弹窗中复制 `Bot Token`（该 Token 通常仅在创建时展示一次）。
-5. 将复制的 Token 用于 OpenClaw 配置中的 `--token` 参数。
-
-示意图（创建机器人并复制 Bot Token）：
-
-![创建机器人并复制 Bot Token 示例](./docs/images/PNG001.png)
-
-## 从 Git 拉取后本地可直接使用（推荐）
-
-1. 克隆仓库并进入目录：
-
-```bash
-git clone https://github.com/kinghy949/openclaw-botlink-channel.git
-```
-
-```bash
-cd openclaw-botlink-channel
-```
-
-2. 安装并启用插件（`openclaw-botlink-channel` 是插件 ID，`botlink` 是渠道 ID）：
-
-```bash
-## 注意末尾的"."不能省略
-openclaw plugins install .
-```
-
-```bash
-openclaw plugins enable openclaw-botlink-channel
-```
-
-3. 添加 Botlink 渠道账号并检查状态：
-
-```bash
-openclaw channels add --channel botlink --token <botToken> --http-url https://test.51yzt.cn
-```
-```bash
-openclaw channels status
-```
-
-4. 可选：探测远端连通性（需要网关运行且凭据有效）：
-
-```bash
-openclaw channels status --probe --timeout 10000
 ```
 
 ## 本地开发（可选）
