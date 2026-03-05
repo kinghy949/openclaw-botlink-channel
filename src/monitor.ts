@@ -137,6 +137,36 @@ function resolveInboundBody(message: TelegramMessage): string {
   return "";
 }
 
+function extractMentionedUsernames(text: string): string[] {
+  const result = new Set<string>();
+  const mentionRegex = /(^|\s)@([a-zA-Z0-9_]{3,32})\b/g;
+  let match: RegExpExecArray | null;
+  while ((match = mentionRegex.exec(text)) !== null) {
+    result.add(match[2].toLowerCase());
+  }
+  return [...result];
+}
+
+function isMessageTargetingBot(message: TelegramMessage, botUsername?: string): boolean {
+  const normalizedBotUsername = botUsername?.trim().toLowerCase();
+  if (!normalizedBotUsername) {
+    return true;
+  }
+
+  const text = `${message.text ?? ""}\n${message.caption ?? ""}`.trim();
+  const mentions = extractMentionedUsernames(text);
+  if (mentions.includes(normalizedBotUsername)) {
+    return true;
+  }
+
+  const replyUsername = message.reply_to_message?.from?.username?.trim().toLowerCase();
+  if (replyUsername && replyUsername === normalizedBotUsername) {
+    return true;
+  }
+
+  return false;
+}
+
 async function deliverBotlinkReply(params: {
   payload: ReplyPayload;
   client: BotlinkApiClient;
@@ -200,15 +230,20 @@ async function processIncomingMessage(params: {
   account: ResolvedBotlinkAccount;
   config: OpenClawConfig;
   runtime: BotlinkRuntimeEnv;
+  botUsername?: string;
   statusSink?: (patch: { lastInboundAt?: number; lastOutboundAt?: number }) => void;
 }) {
-  const { message, client, account, config, runtime, statusSink } = params;
+  const { message, client, account, config, runtime, botUsername, statusSink } = params;
   const rawBody = resolveInboundBody(message);
   if (!rawBody) {
     return;
   }
 
   const isGroup = message.chat.type === "group" || message.chat.type === "supergroup";
+  if (isGroup && account.groupRequireMention && !isMessageTargetingBot(message, botUsername)) {
+    return;
+  }
+
   const chatId = message.chat.id;
   const senderId = String(message.from?.id ?? chatId);
   const senderName = resolveSenderName(message);
@@ -316,6 +351,7 @@ async function processUpdate(params: {
   account: ResolvedBotlinkAccount;
   config: OpenClawConfig;
   runtime: BotlinkRuntimeEnv;
+  botUsername?: string;
   statusSink?: (patch: { lastInboundAt?: number; lastOutboundAt?: number }) => void;
 }) {
   const message = pickInboundMessage(params.update);
@@ -329,6 +365,7 @@ async function processUpdate(params: {
     account: params.account,
     config: params.config,
     runtime: params.runtime,
+    botUsername: params.botUsername,
     statusSink: params.statusSink,
   });
 }
@@ -341,6 +378,16 @@ export async function monitorBotlinkProvider(options: BotlinkMonitorOptions): Pr
 
   let stopped = false;
   let offset = 0;
+  let botUsername: string | undefined;
+
+  try {
+    const me = await client.getMe(10_000);
+    botUsername = me.username?.trim().toLowerCase();
+  } catch (error) {
+    options.runtime.error?.(
+      `[${options.account.accountId}] botlink failed to load bot identity: ${String(error)}`,
+    );
+  }
 
   const stop = () => {
     stopped = true;
@@ -376,6 +423,7 @@ export async function monitorBotlinkProvider(options: BotlinkMonitorOptions): Pr
             account: options.account,
             config: options.config,
             runtime: options.runtime,
+            botUsername,
             statusSink: options.statusSink,
           });
         }

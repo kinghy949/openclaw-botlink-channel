@@ -36,6 +36,54 @@ OpenClaw 的 Botlink 渠道插件。
 }
 ```
 
+## 多账号（多 Agent）配置
+
+如果你要在 Botlink 中使用多个机器人账号（每个账号一个 `botToken`），请使用 `channels.botlink.accounts`，并在 `bindings[].match.accountId` 里把不同账号路由到不同 agent。
+
+> `peer.id` 不能替代 `botToken`。  
+> `peer.id` 是路由匹配维度（谁在说话/哪个群），`botToken` 是连接哪个机器人账号的鉴权凭据。
+
+示例：
+
+```jsonc
+{
+  "channels": {
+    "botlink": {
+      "enabled": true,
+      "apiBaseUrl": "https://test.51yzt.cn",
+      "defaultAccount": "sales",
+      "accounts": {
+        "sales": {
+          "botToken": "<TOKEN_SALES>",
+          "name": "sales-bot",
+          "groupRequireMention": true
+        },
+        "support": {
+          "botToken": "<TOKEN_SUPPORT>",
+          "name": "support-bot",
+          "groupRequireMention": true
+        }
+      }
+    }
+  },
+  "bindings": [
+    {
+      "match": { "channel": "botlink", "accountId": "sales" },
+      "agentId": "agent-sales"
+    },
+    {
+      "match": { "channel": "botlink", "accountId": "support" },
+      "agentId": "agent-support"
+    }
+  ]
+}
+```
+
+说明：
+
+- 单聊：用户给哪个 bot 发消息，就会进入哪个 `accountId`，再按 `bindings` 路由到对应 agent。
+- 群聊：当 `groupRequireMention: true` 时，只处理 `@当前 bot`（或回复该 bot）的消息。
+
 ## 如何获取 botToken
 
 1. 登录 `https://test.51yzt.cn`，进入“机器人”页面。

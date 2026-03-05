@@ -17,7 +17,13 @@ import {
   DEFAULT_ACCOUNT_ID,
 } from "openclaw/plugin-sdk";
 import { BotlinkApiClient } from "./api-client.js";
-import { BotlinkConfigSchema, resolveBotlinkAccount, type ResolvedBotlinkAccount } from "./config-schema.js";
+import {
+  BotlinkConfigSchema,
+  listBotlinkAccountIds,
+  resolveBotlinkAccount,
+  resolveDefaultBotlinkAccountId,
+  type ResolvedBotlinkAccount,
+} from "./config-schema.js";
 import { monitorBotlinkProvider } from "./monitor.js";
 
 type BotlinkProbe = {
@@ -233,9 +239,9 @@ export const botlinkPlugin: ChannelPlugin<ResolvedBotlinkAccount, BotlinkProbe> 
   reload: { configPrefixes: ["channels.botlink"] },
   configSchema: buildChannelConfigSchema(BotlinkConfigSchema),
   config: {
-    listAccountIds: (cfg) => [DEFAULT_ACCOUNT_ID],
+    listAccountIds: (cfg) => listBotlinkAccountIds(cfg),
     resolveAccount: (cfg, accountId) => resolveBotlinkAccount({ cfg, accountId }),
-    defaultAccountId: () => DEFAULT_ACCOUNT_ID,
+    defaultAccountId: (cfg) => resolveDefaultBotlinkAccountId(cfg),
     isConfigured: (account) => account.configured,
     describeAccount: (account): ChannelAccountSnapshot => ({
       accountId: account.accountId,
@@ -247,9 +253,22 @@ export const botlinkPlugin: ChannelPlugin<ResolvedBotlinkAccount, BotlinkProbe> 
   },
   setup: {
     resolveAccountId: ({ accountId }) => normalizeAccountId(accountId),
-    applyAccountName: ({ cfg, name }) => {
+    applyAccountName: ({ cfg, accountId, name }) => {
       if (!name?.trim()) {
         return cfg;
+      }
+      const normalized = normalizeAccountId(accountId);
+      if (normalized === DEFAULT_ACCOUNT_ID) {
+        return {
+          ...cfg,
+          channels: {
+            ...cfg.channels,
+            botlink: {
+              ...(cfg.channels?.botlink ?? {}),
+              name: name.trim(),
+            },
+          },
+        } as OpenClawConfig;
       }
       return {
         ...cfg,
@@ -257,15 +276,20 @@ export const botlinkPlugin: ChannelPlugin<ResolvedBotlinkAccount, BotlinkProbe> 
           ...cfg.channels,
           botlink: {
             ...(cfg.channels?.botlink ?? {}),
-            name: name.trim(),
+            accounts: {
+              ...(cfg.channels?.botlink as { accounts?: Record<string, unknown> } | undefined)?.accounts,
+              [normalized]: {
+                ...(((cfg.channels?.botlink as { accounts?: Record<string, unknown> } | undefined)?.accounts?.[
+                  normalized
+                ] as Record<string, unknown> | undefined) ?? {}),
+                name: name.trim(),
+              },
+            },
           },
         },
       } as OpenClawConfig;
     },
     validateInput: ({ cfg, accountId, input }) => {
-      if (accountId !== DEFAULT_ACCOUNT_ID) {
-        return "Botlink currently supports only the default account.";
-      }
       const account = resolveBotlinkAccount({ cfg, accountId });
       const token = input.token?.trim() || account.botToken;
       if (!token) {
@@ -285,10 +309,34 @@ export const botlinkPlugin: ChannelPlugin<ResolvedBotlinkAccount, BotlinkProbe> 
       }
       return null;
     },
-    applyAccountConfig: ({ cfg, input }) => {
-      const account = resolveBotlinkAccount({ cfg });
+    applyAccountConfig: ({ cfg, accountId, input }) => {
+      const normalized = normalizeAccountId(accountId);
+      const account = resolveBotlinkAccount({ cfg, accountId: normalized });
       const nextBotToken = input.token?.trim() || account.botToken;
       const nextApiBaseUrl = input.httpUrl?.trim() || account.apiBaseUrl;
+
+      if (normalized === DEFAULT_ACCOUNT_ID) {
+        return {
+          ...cfg,
+          channels: {
+            ...cfg.channels,
+            botlink: {
+              ...(cfg.channels?.botlink ?? {}),
+              enabled: true,
+              ...(input.name?.trim() ? { name: input.name.trim() } : {}),
+              botToken: nextBotToken,
+              apiBaseUrl: nextApiBaseUrl,
+            },
+          },
+        } as OpenClawConfig;
+      }
+
+      const existingAccounts =
+        ((cfg.channels?.botlink as { accounts?: Record<string, unknown> } | undefined)?.accounts as
+          | Record<string, unknown>
+          | undefined) ?? {};
+      const existingAccount = (existingAccounts[normalized] as Record<string, unknown> | undefined) ?? {};
+
       return {
         ...cfg,
         channels: {
@@ -296,9 +344,16 @@ export const botlinkPlugin: ChannelPlugin<ResolvedBotlinkAccount, BotlinkProbe> 
           botlink: {
             ...(cfg.channels?.botlink ?? {}),
             enabled: true,
-            ...(input.name?.trim() ? { name: input.name.trim() } : {}),
-            botToken: nextBotToken,
-            apiBaseUrl: nextApiBaseUrl,
+            accounts: {
+              ...existingAccounts,
+              [normalized]: {
+                ...existingAccount,
+                enabled: true,
+                ...(input.name?.trim() ? { name: input.name.trim() } : {}),
+                botToken: nextBotToken,
+                apiBaseUrl: nextApiBaseUrl,
+              },
+            },
           },
         },
       } as OpenClawConfig;

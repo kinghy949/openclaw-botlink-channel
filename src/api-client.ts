@@ -47,7 +47,13 @@ export type TelegramMessage = {
   voice?: { file_id: string; file_name?: string; mime_type?: string };
   animation?: { file_id: string; file_name?: string; mime_type?: string };
   sticker?: { file_id: string; emoji?: string };
-  reply_to_message?: { message_id?: number };
+  reply_to_message?: {
+    message_id?: number;
+    from?: TelegramUser;
+    chat?: TelegramChat;
+    text?: string;
+    caption?: string;
+  };
 };
 
 export type TelegramUpdate = {
