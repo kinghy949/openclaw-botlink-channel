@@ -84,6 +84,30 @@ OpenClaw 的 Botlink 渠道插件。
 - 单聊：用户给哪个 bot 发消息，就会进入哪个 `accountId`，再按 `bindings` 路由到对应 agent。
 - 群聊：当 `groupRequireMention: true` 时，只处理 `@当前 bot`（或回复该 bot）的消息。
 
+### 通过 CLI 新增 Agent 并绑定 Botlink 账号
+
+新增一个 agent 时，按以下顺序执行：
+
+```bash
+openclaw agents add <agentName>
+openclaw channels add --channel botlink --account <agentName> --token <botToken> --http-url https://test.51yzt.cn
+openclaw agents bind --agent <agentName> --bind botlink:<agentName>
+```
+
+说明：
+
+- `<>` 中的值由用户自行指定。
+- 同一次新增流程中，`<agentName>` 在三条命令里必须保持一致。
+- `<botToken>` 使用该 Botlink 机器人的真实 Token。
+
+示例（`agentName = kinghy`）：
+
+```bash
+openclaw agents add kinghy
+openclaw channels add --channel botlink --account kinghy --token bot_4RZ*******FiwwTfMyvfc --http-url https://test.51yzt.cn
+openclaw agents bind --agent kinghy --bind botlink:kinghy
+```
+
 ## 如何获取 botToken
 
 1. 登录 `https://test.51yzt.cn`，进入“机器人”页面。
