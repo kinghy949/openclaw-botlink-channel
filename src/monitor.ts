@@ -9,6 +9,7 @@ import {
 import type { ResolvedBotlinkAccount } from "./config-schema.js";
 import type { TelegramMessage, TelegramUpdate } from "./api-client.js";
 import { BotlinkApiClient } from "./api-client.js";
+import { isMessageTargetingBot } from "./mentions.js";
 import { getBotlinkRuntime } from "./runtime.js";
 
 export type BotlinkRuntimeEnv = {
@@ -135,36 +136,6 @@ function resolveInboundBody(message: TelegramMessage): string {
     return mediaRefs.map((item) => `<media:${item.label}>`).join(" ");
   }
   return "";
-}
-
-function extractMentionedUsernames(text: string): string[] {
-  const result = new Set<string>();
-  const mentionRegex = /(^|\s)@([a-zA-Z0-9_]{3,32})\b/g;
-  let match: RegExpExecArray | null;
-  while ((match = mentionRegex.exec(text)) !== null) {
-    result.add(match[2].toLowerCase());
-  }
-  return [...result];
-}
-
-function isMessageTargetingBot(message: TelegramMessage, botUsername?: string): boolean {
-  const normalizedBotUsername = botUsername?.trim().toLowerCase();
-  if (!normalizedBotUsername) {
-    return true;
-  }
-
-  const text = `${message.text ?? ""}\n${message.caption ?? ""}`.trim();
-  const mentions = extractMentionedUsernames(text);
-  if (mentions.includes(normalizedBotUsername)) {
-    return true;
-  }
-
-  const replyUsername = message.reply_to_message?.from?.username?.trim().toLowerCase();
-  if (replyUsername && replyUsername === normalizedBotUsername) {
-    return true;
-  }
-
-  return false;
 }
 
 async function deliverBotlinkReply(params: {
